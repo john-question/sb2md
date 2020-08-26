@@ -14,21 +14,45 @@ def main():
         for p in sb['pages']:
             title = p['title']
             lines = p['lines']
+            is_in_codeblock = False
             with open(f'{outdir}{title}.md', 'w', encoding='utf-8') as fw:
                 for i, l in enumerate(lines):
                     if i == 0:
                         l = '# ' + l
                     else:
-                        l = convert(l)
+                        # 複数行コードブロックの処理
+                        if l.startswith('code:'):
+                            is_in_codeblock = True
+                            ext = l.split('.')[-1]
+                            l += f'\n```{ext}'
+                        elif is_in_codeblock and not l.startswith(' '):
+                            is_in_codeblock = False
+                            fw.write('```\n')
+                        if not is_in_codeblock:
+                            l = convert(l)
                     fw.write(l + '\n')
+                if is_in_codeblock:
+                    fw.write('```\n')
 
 
 def convert(l: str) -> str:
+    l = escape_hash_tag(l)
     l = convert_list(l)
     l = convert_bold(l)
     l = convert_italic(l)
     l = convert_strike(l)
     l = convert_link(l)
+    return l
+
+
+def escape_hash_tag(l: str) -> str:
+    '''
+    ハッシュタグをコードブロックに変換。
+    '''
+    for m in re.finditer(r'#(.+)?[ \t]', ignore_code(l)):
+        l = l.replace(m.group(0), '`' + m.group(0) + '`')
+    if l.startswith('#'):  # 1行全てタグの場合
+        l = '`' + l + '`'
     return l
 
 
