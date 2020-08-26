@@ -1,16 +1,20 @@
 import json
 import sys
 import re
+import os
 
 
 def main():
     filename = sys.argv[1]
     with open(filename, 'r', encoding='utf-8') as fr:
         sb = json.load(fr)
+        outdir = 'markdown/'
+        if not os.path.exists(outdir):
+            os.mkdir(outdir)
         for p in sb['pages']:
             title = p['title']
             lines = p['lines']
-            with open(title + '.md', 'w', encoding='utf-8') as fw:
+            with open(f'{outdir}{title}.md', 'w', encoding='utf-8') as fw:
                 for i, l in enumerate(lines):
                     if i == 0:
                         l = '# ' + l
@@ -76,11 +80,23 @@ def convert_link(l: str) -> str:
     リンクをMarkdownに変換。
     '''
     for m in re.finditer(r'\[(.+?)\]', ignore_code(l)):
-        l = l.replace(m.group(0), m.group(0) + '()')
+        # タイトル+リンク形式の場合を考慮する
+        tmp = m.group(1).split(' ')
+        if len(tmp) == 2:
+            if tmp[0].startswith('http'):
+                link, title = tmp
+            else:
+                title, link = tmp
+            l = l.replace(m.group(0), f'[{title}]({link})')
+        else:
+            l = l.replace(m.group(0), m.group(0) + '()')
     return l
 
 
 def ignore_code(l: str) -> str:
+    '''
+    コード箇所を削除した文字列を返す。
+    '''
     for m in re.finditer(r'`.+`', l):
         l = l.replace(m.group(0), '')
     return l
