@@ -30,6 +30,9 @@ def main():
                             fw.write('```\n')
                         if not is_in_codeblock:
                             l = convert(l)
+                    # リストや見出し以外には改行を入れる
+                    if not (is_in_codeblock or l.startswith('#') or re.match(r' *- | *[0-9]+. ', l) or l == ""):
+                        l += '  '
                     fw.write(l + '\n')
                 if is_in_codeblock:
                     fw.write('```\n')
