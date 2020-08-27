@@ -49,7 +49,7 @@ def escape_hash_tag(l: str) -> str:
     '''
     ハッシュタグをコードブロックに変換。
     '''
-    for m in re.finditer(r'#(.+)?[ \t]', ignore_code(l)):
+    for m in re.finditer(r'#(.+?)[ \t]', ignore_code(l)):
         l = l.replace(m.group(0), '`' + m.group(0) + '`')
     if l.startswith('#'):  # 1行全てタグの場合
         l = '`' + l + '`'
@@ -72,7 +72,10 @@ def convert_bold(l: str) -> str:
     '''
     太字をMarkdownに変換。
     '''
-    for m in re.finditer(r'\[(\*+) (.+)\]', ignore_code(l)):
+    for m in re.finditer(r'\[\[(.+?)\]\]', ignore_code(l)):
+        l = l.replace(m.group(0), '**' + m.group(1) + '**')
+    # 別の記法
+    for m in re.finditer(r'\[(\*+) (.+?)\]', ignore_code(l)):
         if m.group(0) == l and m.group(1) in ['**', '***']:  # おそらく見出し
             l = '#' * (5 - len(m.group(1))) + ' ' + \
                 m.group(2)  # Scrapboxは*が多い方が大きい
@@ -121,7 +124,7 @@ def ignore_code(l: str) -> str:
     '''
     コード箇所を削除した文字列を返す。
     '''
-    for m in re.finditer(r'`.+`', l):
+    for m in re.finditer(r'`.+?`', l):
         l = l.replace(m.group(0), '')
     return l
 
