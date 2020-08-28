@@ -23,8 +23,7 @@ def main():
                         # 複数行コードブロックの処理
                         if l.startswith('code:'):
                             is_in_codeblock = True
-                            ext = l.split('.')[-1]
-                            l += f'\n```{ext}'
+                            l += f'\n```'
                         elif is_in_codeblock and not l.startswith(' '):
                             is_in_codeblock = False
                             fw.write('```\n')
