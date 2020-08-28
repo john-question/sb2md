@@ -42,8 +42,7 @@ def convert(l: str) -> str:
     l = escape_hash_tag(l)
     l = convert_list(l)
     l = convert_bold(l)
-    l = convert_italic(l)
-    l = convert_strike(l)
+    l = convert_decoration(l)
     l = convert_link(l)
     return l
 
@@ -73,35 +72,33 @@ def convert_list(l: str) -> str:
 
 def convert_bold(l: str) -> str:
     '''
-    太字をMarkdownに変換。
+    太字([[]]、**、***)をMarkdownに変換。
     '''
     for m in re.finditer(r'\[\[(.+?)\]\]', ignore_code(l)):
         l = l.replace(m.group(0), '**' + m.group(1) + '**')
-    # 別の記法
-    for m in re.finditer(r'\[(\*+) (.+?)\]', ignore_code(l)):
-        if m.group(0) == l and m.group(1) in ['**', '***']:  # おそらく見出し
-            l = '#' * (5 - len(m.group(1))) + ' ' + \
-                m.group(2)  # Scrapboxは*が多い方が大きい
-        else:
-            l = l.replace(m.group(0), '**' + m.group(2) + '**')
+    m = re.match(r'\[(\*\*|\*\*\*) (.+?)\]', ignore_code(l))  # おそらく見出し
+    if m:
+        l = '#' * (5 - len(m.group(1))) + ' ' + \
+            m.group(2)  # Scrapboxは*が多い方が大きい
     return l
 
 
-def convert_italic(l: str) -> str:
+def convert_decoration(l: str) -> str:
     '''
-    斜体をMarkdownに変換。
+    文字装飾をMarkdownに変換。
     '''
-    for m in re.finditer(r'\[/ (.+?)\]', ignore_code(l)):
-        l = l.replace(m.group(0), ' _' + m.group(1) + '_ ')
-    return l
-
-
-def convert_strike(l: str) -> str:
-    '''
-    打消し線をMarkdownに変換。
-    '''
-    for m in re.finditer(r'\[- (.+?)\]', ignore_code(l)):
-        l = l.replace(m.group(0), '~~' + m.group(1) + '~~')
+    for m in re.finditer(r'\[([-\*/]+) (.+?)\]', ignore_code(l)):
+        deco_s, deco_e = ' ', ' '
+        if '/' in m.group(0):
+            deco_s += '_'
+            deco_e = '_' + deco_e
+        if '-' in m.group(0):
+            deco_s += '~~'
+            deco_e = '~~' + deco_e
+        if '*' in m.group(0):
+            deco_s += '**'
+            deco_e = '**' + deco_e
+        l = l.replace(m.group(0), deco_s + m.group(2) + deco_e)
     return l
 
 
