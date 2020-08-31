@@ -15,6 +15,8 @@ def main():
             title = p['title']
             lines = p['lines']
             is_in_codeblock = False
+            is_in_table = False
+            row = -1
             with open(f'{outdir}{title}.md', 'w', encoding='utf-8') as fw:
                 for i, l in enumerate(lines):
                     if i == 0:
@@ -27,10 +29,23 @@ def main():
                         elif is_in_codeblock and not l.startswith(' '):
                             is_in_codeblock = False
                             fw.write('```\n')
+                        # テーブルの処理
+                        if l.startswith('table:'):
+                            is_in_table = True
+                        elif is_in_table and not l.startswith('\t'):
+                            is_in_table = False
+                        if is_in_table:
+                            row += 1
+                            if row != 0:
+                                l = l.replace('\t', '|') + '|'
+                            if row == 1:
+                                col = l.count('|')
+                                l += f'\n{"|-----" * col}|'
+                        # コードブロックでなければ変換
                         if not is_in_codeblock:
                             l = convert(l)
                     # リストや見出し以外には改行を入れる
-                    if not (is_in_codeblock or l.startswith('#') or re.match(r' *- | *[0-9]+. ', l) or l == ""):
+                    if not (is_in_codeblock or is_in_table or l.startswith('#') or re.match(r' *- | *[0-9]+. ', l) or l == ""):
                         l += '  '
                     fw.write(l + '\n')
                 if is_in_codeblock:
