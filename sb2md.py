@@ -26,18 +26,20 @@ def main():
                         if l.startswith('code:'):
                             is_in_codeblock = True
                             l += f'\n```'
-                        elif is_in_codeblock and not l.startswith(' '):
+                        elif is_in_codeblock and not l.startswith(('\t', ' ', '　')):
                             is_in_codeblock = False
                             fw.write('```\n')
                         # テーブルの処理
                         if l.startswith('table:'):
                             is_in_table = True
-                        elif is_in_table and not l.startswith('\t'):
+                        elif is_in_table and not l.startswith(('\t', ' ', '　')):
                             is_in_table = False
                         if is_in_table:
                             row += 1
                             if row != 0:
                                 l = l.replace('\t', '|') + '|'
+                                if l.startswith(' '):
+                                    l = l.replace(' ', '|', 1)
                             if row == 1:
                                 col = l.count('|')
                                 l += f'\n{"|-----" * col}|'
@@ -76,7 +78,7 @@ def convert_list(l: str) -> str:
     '''
     先頭の空白をMarkdownのリストに変換。
     '''
-    m = re.match(r'[ \t]+', l)
+    m = re.match(r'[ \t　]+', l)
     if m:
         # 空白の個数分インデントする
         l = l.replace(m.group(0),
