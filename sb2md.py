@@ -17,6 +17,7 @@ def main():
             is_in_codeblock = False
             is_in_table = False
             row = -1
+            title = title.replace('/', '_')
             with open(f'{outdir}{title}.md', 'w', encoding='utf-8') as fw:
                 for i, l in enumerate(lines):
                     if i == 0:
