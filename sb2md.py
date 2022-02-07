@@ -75,7 +75,6 @@ def convert(l: str) -> str:
 def escape_customized_decorator(l: str) -> str:
     for m in re.finditer(r'\[\*+\.+\s.+?\]', ignore_code(l)):
         l = l.replace(m.group(0), m.group(0).replace('.', ''))
-        print(l)
     return l
 
 def escape_hash_tag(l: str) -> str:
