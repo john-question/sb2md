@@ -25,6 +25,7 @@ def main():
             is_in_table = False
             row = -1
             title = title.replace('/', '_')
+            print(f'processing: {title}')
             with open(f'{outdir}{title}.md', 'w', encoding='utf-8') as fw:
                 fw.write('作成日時: ' + created_at + '\n' + '更新日時: ' + updated_at + '\n')
                 for i, l in enumerate(lines):
@@ -81,7 +82,7 @@ def escape_hash_tag(l: str) -> str:
     '''
     ハッシュタグをコードブロックに変換。
     '''
-    for m in re.finditer(r'#([^\x01-\x7E]|\w|\.|%|&)+', ignore_code(l)):
+    for m in re.finditer(r'#([^\x01-\x7E]|\w|\.|%|&|_)+', ignore_code(l)):
         l = l.replace(m.group(0), '`' + m.group(0) + '`')
     if l.startswith('#'):  # 1行全てタグの場合
         l = '`' + l + '`'
